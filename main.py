@@ -1,5 +1,6 @@
 import turtle
 import random
+import numpy as np
 
 window = turtle.Screen()
 window.bgcolor("black")
@@ -10,6 +11,16 @@ height = 10
 gold_qty = 3
 abyss_qty = 5
 gold_won = []
+maze = []
+
+
+class MazePosition:
+    wumpus = False
+    abyss = False
+    bad_smell = False
+    breeze = False
+    gold = False
+
 
 class Obstacle:
     width = 0
@@ -114,22 +125,25 @@ def define_obstacle(obstacle_class, perception_class, coordinate_x, coordinate_y
         perception_class.stamp()
 
 
-# def restrict_position(): restringir onde pode renderizar os quadrados
-
-
 def setup_maze():
     for x in range(width):
+        maze.append([])
         for y in range(height):
             screen_x = get_screen_x(x)
             screen_y = get_screen_y(y)
             maze_square.goto(screen_x, screen_y)
             maze_square.stamp()
+            maze[x].append(MazePosition())
 
-    agent.width = 0
-    agent.height = 0
-    screen_x = get_screen_x(agent.width)
-    screen_y = get_screen_y(agent.height)
-    agent_square.goto(screen_x, screen_y)
+
+def setup_obstacles():
+    wumpus_width = random.randint(0, width - 1)
+    wumpus_height = random.randint(0, height - 1)
+    screen_x = get_screen_x(wumpus_width)
+    screen_y = get_screen_y(wumpus_height)
+    wumpus_square.goto(screen_x, screen_y)
+    wumpus_square.stamp()
+    maze[wumpus_width][wumpus_height].wumpus = True
 
     for x in range(gold_qty):
         gold_width = random.randint(0, width - 1)
@@ -138,24 +152,16 @@ def setup_maze():
         screen_y = get_screen_y(gold_height)
         gold_square.goto(screen_x, screen_y)
         gold_square.stamp()
-        new_gold = Obstacle()
-        new_gold.height = gold_height
-        new_gold.width = gold_width
-        golds.append(new_gold)
+        maze[gold_width][gold_height].gold = True
 
     for x in range(abyss_qty):
         abyss_width = random.randint(0, width - 1)
         abyss_height = random.randint(0, height - 1)
-        if not (abyss_height == wumpus.height and abyss_width == wumpus.width):
-            new_abyss = Obstacle()
-            new_abyss.height = abyss_height
-            new_abyss.width = abyss_width
-            abyss.append(new_abyss)
-            define_obstacle(abyss_square, breeze_square, abyss_width, abyss_height)
-
-    wumpus.width = random.randint(0, width-1)
-    wumpus.height = random.randint(0, height-1)
-    define_obstacle(wumpus_square, bad_smell_square, wumpus.width, wumpus.height)
+        screen_x = get_screen_x(abyss_width)
+        screen_y = get_screen_y(abyss_height)
+        gold_square.goto(screen_x, screen_y)
+        gold_square.stamp()
+        maze[abyss_width][abyss_height].abyss = True
 
 
 maze_square = MazeSquare()
@@ -170,8 +176,6 @@ agent = Obstacle()
 abyss = []
 golds = []
 setup_maze()
-
-agent_square.goto(get_screen_x(1), get_screen_y(0))
-agent_square.goto(get_screen_x(2), get_screen_y(0))
+setup_obstacles()
 
 window.exitonclick()
